@@ -147,7 +147,7 @@ def help():
           "\n"
           "Optional -if issuer.pem Parameter: Use a local file to indicate the issuing CA instead of finding it in the certificate\n"
           "\n"
-          "ocsp_check version 0.0.12\n"
+          "ocsp_check version 0.0.13\n"
           "Author: Martijn Katerbarg")
 
 
@@ -173,7 +173,8 @@ def getCAIssuer(certificate):
 
 
 def getOCSPServerURL(certificate):
-    global ocsp_url
+
+    ocspUrl = None
 
     try:
         authorityInfoAccess = certificate.extensions.get_extension_for_oid(
@@ -181,13 +182,14 @@ def getOCSPServerURL(certificate):
 
         for authorityInfoAccessMethod in iter((authorityInfoAccess)):
             if authorityInfoAccessMethod.__getattribute__("access_method")._name == "OCSP":
-                ocsp_url = authorityInfoAccessMethod.__getattribute__("access_location").value
+                ocspUrl = authorityInfoAccessMethod.__getattribute__("access_location").value
 
-        if len(ocsp_url) > 6:
-            return ocsp_url
+        if ocspUrl is None:
+            print("ERROR: No OCSP Server URL found in certificate. Quitting.")
+            exit(-1)
 
         else:
-            raise ValueError("No OCSP Server URL found in certificate")
+            return ocspUrl
 
     except ExtensionNotFound:
         print("ERROR: Certificate AIA Extension Missing. Possible Root Certificate.")

@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.13
+Proper error handling for certificates without an OCSP server
+
 ### 0.0.12 
 Implemented feature to get certificate from file
 
