@@ -15,7 +15,7 @@ def main():
     if len(sys.argv) >= 4:
 
         if sys.argv[2] == "-f" or sys.argv[2] == "--file":
-            print("Feature Not Yet Implemented")
+            fromFile(sys.argv[3])
 
         elif sys.argv[2] == "-d" or sys.argv[2] == "--domain":
             print("Feature Not Yet Implemented")
@@ -112,6 +112,16 @@ def prepareOCSPRequest(certificate):
     elif(sys.argv[1] == "-g" or sys.argv[1] == "--GET" or sys.argv[1] == "--get"):
         sendOCSPRequestGET(base64Request.decode(), ocspUrl)
 
+
+def fromFile(fileName):
+
+    base64CertificateFile = open(fileName, 'rb')
+    base64Certificate = base64CertificateFile.read()
+    certificate = x509.load_pem_x509_certificate(base64Certificate, default_backend())
+
+    prepareOCSPRequest(certificate)
+
+
 def crtsh(crtshId):
 
     base64Certificate = requests.get('https://crt.sh/?d=' + crtshId)
@@ -137,7 +147,7 @@ def help():
           "\n"
           "Optional -if issuer.pem Parameter: Use a local file to indicate the issuing CA instead of finding it in the certificate\n"
           "\n"
-          "ocsp_check version 0.0.11\n"
+          "ocsp_check version 0.0.12\n"
           "Author: Martijn Katerbarg")
 
 

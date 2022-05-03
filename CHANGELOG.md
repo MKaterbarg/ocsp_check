@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.12 
+Implemented feature to get certificate from file
+
 ### 0.0.11
 Added ability to provide the issuing CA by file for cases where the Issuer CA is not provided in the certificate
 
