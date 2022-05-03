@@ -11,7 +11,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='ocsp_check',
-    version='0.0.5',
+    version='0.0.11',
     url='https://github.com/MKaterbarg/ocsp_check',
     license='MIT',
     author='Martijn Katerbarg',
@@ -20,7 +20,7 @@ setup(
     long_description_content_type="text/markdown",
     author_email='martijnkaterbarg@gmail.com',
     description='Perform GET and POST OCSP checks.',
-    requires=[
+    install_requires=[
         'requests',
         'cryptography'
     ],

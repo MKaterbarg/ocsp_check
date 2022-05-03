@@ -1,4 +1,4 @@
-#OCSP Check
+# OCSP Check
 
 Usage Syntax: ocsp_check --POST/--GET -c/-d/-f target
 
@@ -13,5 +13,5 @@ Source Parameters:
 
 Target Parameter: In place of target should be a crt.sh ID, domain/website (including https://) or local filename
 
-ocsp_check version 0.0.5  
+ocsp_check version 0.0.11  
 Author: Martijn Katerbarg

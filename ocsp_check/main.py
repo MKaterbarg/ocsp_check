@@ -12,7 +12,7 @@ from cryptography.hazmat.backends import default_backend
 
 
 def main():
-    if len(sys.argv) == 4:
+    if len(sys.argv) >= 4:
 
         if sys.argv[2] == "-f" or sys.argv[2] == "--file":
             print("Feature Not Yet Implemented")
@@ -76,14 +76,29 @@ def sendOCSPRequestGET(base64Request, ocspUrl):
 
 def prepareOCSPRequest(certificate):
     ocspUrl = getOCSPServerURL(certificate)
-    CACertificateURL = getCAIssuer(certificate)
 
-    CACertificateData = requests.get(CACertificateURL)
+    if len(sys.argv) > 4:
+        if(sys.argv[4] == "-if"):
+            CACertificateFile = open(sys.argv[5], 'rb')
+            CACertificateData = CACertificateFile.read()
+
+        else:
+            print("ERROR: Invalid argument (" + sys.argv[4] + ")")
+            exit(-1)
+
+    else:
+        CACertificateURL = getCAIssuer(certificate)
+
+        CACertificateData = requests.get(CACertificateURL).content
 
     try:
-        CACertificate = x509.load_pem_x509_certificate(CACertificateData.content, default_backend())
+        CACertificate = x509.load_pem_x509_certificate(CACertificateData, default_backend())
     except ValueError:
-        CACertificate = x509.load_der_x509_certificate(CACertificateData.content, default_backend())
+        try:
+            CACertificate = x509.load_der_x509_certificate(CACertificateData, default_backend())
+        except ValueError:
+            print("ERROR: Unable to decode certificate as PEM or DER encoded certificate. Quitting.")
+            exit(-1)
 
     ocspRequest = ocsp.OCSPRequestBuilder()
     ocspRequest = ocspRequest.add_certificate(certificate, CACertificate, SHA1())
@@ -107,26 +122,28 @@ def crtsh(crtshId):
 
 def help():
     print("ocsp_check")
-    print("Usage Syntax: ocsp_check --POST/--GET -c/-d/-f target"
+    print("Usage Syntax: ocsp_check --POST/--GET -c/-d/-f target [-if issuer.pem]" 
           "\n\n"
           "Method Parameters: \n"
           "     --POST / -p      Perform the OCSP request using an HTTP POST call\n"
           "     --GET / -g      Perform the OCSP request using an HTTP GET call\n"
-          "\n\n"
+          "\n"
           "Source Parameters: \n"
           "     -c      Use a crt.sh ID as target\n"
           "     -d      Use a domain / live website as target\n"
           "     -f      Use a local file containing a certificate as target\n"
-          "\n\n"
+          "\n"
           "Target Parameter: In place of target should be a crt.sh ID, domain/website (including https://) or local filename\n"
-          "\n\n"
-          "ocsp_check version 0.0.5\n"
+          "\n"
+          "Optional -if issuer.pem Parameter: Use a local file to indicate the issuing CA instead of finding it in the certificate\n"
+          "\n"
+          "ocsp_check version 0.0.11\n"
           "Author: Martijn Katerbarg")
 
 
 def getCAIssuer(certificate):
 
-    global CACertificate
+    CACertificate = None
     try:
         authorityInfoAccess = certificate.extensions.get_extension_for_oid(
             ExtensionOID.AUTHORITY_INFORMATION_ACCESS).value
@@ -135,19 +152,19 @@ def getCAIssuer(certificate):
             if authorityInfoAccessMethod.__getattribute__("access_method")._name == "caIssuers":
                 CACertificate = authorityInfoAccessMethod.__getattribute__("access_location").value
 
-        if len(CACertificate) > 6:
-            return CACertificate
-
+        if CACertificate is None:
+            print("ERROR: No CA Issuer URL found in certificate. Quitting.")
+            exit(-1)
         else:
-            raise ValueError("No OCSP Server URL found in certificate")
+             return CACertificate
 
     except ExtensionNotFound:
-        raise ValueError("Certificate AIA Extension Missing. Possible Root Certificate."
-                         ) from None
+        print("ERROR: Certificate AIA Extension Missing. Possible Root Certificate.")
 
 
 def getOCSPServerURL(certificate):
     global ocsp_url
+
     try:
         authorityInfoAccess = certificate.extensions.get_extension_for_oid(
             ExtensionOID.AUTHORITY_INFORMATION_ACCESS).value
@@ -163,8 +180,7 @@ def getOCSPServerURL(certificate):
             raise ValueError("No OCSP Server URL found in certificate")
 
     except ExtensionNotFound:
-        raise ValueError("Certificate AIA Extension Missing. Possible Root Certificate."
-                         ) from None
+        print("ERROR: Certificate AIA Extension Missing. Possible Root Certificate.")
 
 
 def incorrectSyntax():
