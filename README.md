@@ -13,5 +13,5 @@ Source Parameters:
 
 Target Parameter: In place of target should be a crt.sh ID, domain/website (including https://) or local filename
 
-ocsp_check version 0.0.13  
+ocsp_check version 0.0.14  
 Author: Martijn Katerbarg

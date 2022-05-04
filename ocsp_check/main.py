@@ -147,7 +147,7 @@ def help():
           "\n"
           "Optional -if issuer.pem Parameter: Use a local file to indicate the issuing CA instead of finding it in the certificate\n"
           "\n"
-          "ocsp_check version 0.0.13\n"
+          "ocsp_check version 0.0.14\n"
           "Author: Martijn Katerbarg")
 
 
@@ -170,7 +170,7 @@ def getCAIssuer(certificate):
 
     except ExtensionNotFound:
         print("ERROR: Certificate AIA Extension Missing. Possible Root Certificate.")
-
+        exit(-1)
 
 def getOCSPServerURL(certificate):
 
@@ -193,7 +193,7 @@ def getOCSPServerURL(certificate):
 
     except ExtensionNotFound:
         print("ERROR: Certificate AIA Extension Missing. Possible Root Certificate.")
-
+        exit(-1)
 
 def incorrectSyntax():
     print("Incorrect Syntax. Please see 'ocsp_check -h' for usage and help")

@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.14
+Actually quit if no AIA extension is found 
+
 ### 0.0.13
 Proper error handling for certificates without an OCSP server
 
