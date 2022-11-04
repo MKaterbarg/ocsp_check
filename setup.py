@@ -11,7 +11,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='ocsp_check',
-    version='0.0.14',
+    version='0.0.15',
     url='https://github.com/MKaterbarg/ocsp_check',
     license='MIT',
     author='Martijn Katerbarg',

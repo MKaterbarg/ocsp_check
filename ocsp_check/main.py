@@ -3,6 +3,7 @@ import urllib.parse
 import requests
 import subprocess
 import base64
+import ssl
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.hashes import SHA256, SHA1
@@ -12,13 +13,14 @@ from cryptography.hazmat.backends import default_backend
 
 
 def main():
+
     if len(sys.argv) >= 4:
 
         if sys.argv[2] == "-f" or sys.argv[2] == "--file":
             fromFile(sys.argv[3])
 
         elif sys.argv[2] == "-d" or sys.argv[2] == "--domain":
-            print("Feature Not Yet Implemented")
+            fromSite(sys.argv[3], sys.argv[4])
 
         elif sys.argv[2] == "-c" or sys.argv[2] == "--crtsh":
             crtsh(sys.argv[3])
@@ -77,14 +79,9 @@ def sendOCSPRequestGET(base64Request, ocspUrl):
 def prepareOCSPRequest(certificate):
     ocspUrl = getOCSPServerURL(certificate)
 
-    if len(sys.argv) > 4:
-        if(sys.argv[4] == "-if"):
-            CACertificateFile = open(sys.argv[5], 'rb')
-            CACertificateData = CACertificateFile.read()
-
-        else:
-            print("ERROR: Invalid argument (" + sys.argv[4] + ")")
-            exit(-1)
+    if len(sys.argv) > 4 and sys.argv[4] == "-if":
+        CACertificateFile = open(sys.argv[5], 'rb')
+        CACertificateData = CACertificateFile.read()
 
     else:
         CACertificateURL = getCAIssuer(certificate)
@@ -113,6 +110,16 @@ def prepareOCSPRequest(certificate):
         sendOCSPRequestGET(base64Request.decode(), ocspUrl)
 
 
+def fromSite(domain, port):
+
+    serverAddress = (domain, port)
+    base64Certificate = ssl.get_server_certificate(serverAddress)
+
+    certificate = x509.load_pem_x509_certificate(bytes(base64Certificate, 'utf-8'), default_backend())
+
+    prepareOCSPRequest(certificate)
+
+
 def fromFile(fileName):
 
     base64CertificateFile = open(fileName, 'rb')
@@ -125,6 +132,7 @@ def fromFile(fileName):
 def crtsh(crtshId):
 
     base64Certificate = requests.get('https://crt.sh/?d=' + crtshId)
+
     certificate = x509.load_pem_x509_certificate(base64Certificate.content, default_backend())
 
     prepareOCSPRequest(certificate)
