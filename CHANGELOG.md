@@ -1,5 +1,11 @@
 ## Changelog
 
+### 0.0.16
+Add --certstatus as parameter option. If used, the OCSPCertStatus will be returned instead of the OCSPResponseStatus
+
+### 0.0.15 
+Add the -d / --domain feature
+
 ### 0.0.14
 Actually quit if no AIA extension is found 
 

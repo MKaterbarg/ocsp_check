@@ -50,7 +50,11 @@ def main():
 
 def getOCSPResponse(OCSPResponse):
     OCSPResp = ocsp.load_der_ocsp_response(OCSPResponse)
-    print(OCSPResp.response_status)
+
+    if((len(sys.argv) > 5 and sys.argv[5] == "--certstatus") or (len(sys.argv) > 4 and sys.argv[4] == "--certstatus")):
+        print(OCSPResp.certificate_status)
+    else:
+        print(OCSPResp.response_status)
 
 
 
